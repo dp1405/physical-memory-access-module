@@ -49,6 +49,5 @@ sudo dmesg
 To execute read and write operations from the terminal, use following commands:
 ```console
 echo "Message to write" | sudo tee /dev/pmad0           # write to file
-sudo cat /dev/pmad0                                     # read from file
+sudo cat /dev/pmad0 | less                              # read from file
 ```
-
