@@ -1,0 +1,1 @@
+savedcmd_/home/ubuntu/driver_example/Module.symvers :=  scripts/mod/modpost -M -m -a      -o /home/ubuntu/driver_example/Module.symvers -T /home/ubuntu/driver_example/modules.order -i Module.symvers -e 

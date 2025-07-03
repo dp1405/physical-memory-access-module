@@ -19,12 +19,12 @@ static struct cdev c_dev;
 static void __iomem *vram;
 
 static int my_open(struct inode *i, struct file *f){
-    printk(KERN_INFO "ofd: open() was called!\n");
+    printk(KERN_INFO "pmad: open() was called!\n");
     return 0;
 }
 
 static int my_close(struct inode *i, struct file *f){
-    printk(KERN_INFO "ofd: close() was called!\n");
+    printk(KERN_INFO "pmad: close() was called!\n");
     return 0;
 }
 
@@ -84,32 +84,32 @@ static struct file_operations my_ops= {
     .write = my_write
 };
 
-static int __init ofd_init(void){
+static int __init pmad_init(void){
 
     int ret;
     struct device *dev_ret;
 
     if((vram = ioremap(VRAM_BASE, VRAM_SIZE))==NULL){
-        printk(KERN_ERR "Error mapping physical memory at physical address 0x%d to virtual memory\n", VRAM_BASE);
+        printk(KERN_ERR "pmad: Error mapping physical memory at physical address 0x%d to virtual memory\n", VRAM_BASE);
 
         return -ENOMEM;
     }
 
-    if((ret = alloc_chrdev_region(&first, 0, num_of_device_files, "drpn")) < 0){  //int alloc_chrdev_region(dev_t *first, unsigned int firstminor, unsigned int cnt, char *name);
-        printk(KERN_ERR "ofd: failed allocating region for character devices\n");
+    if((ret = alloc_chrdev_region(&first, 0, num_of_device_files, "pmad")) < 0){  //int alloc_chrdev_region(dev_t *first, unsigned int firstminor, unsigned int cnt, char *name);
+        printk(KERN_ERR "pmad: failed allocating region for character devices\n");
         return ret;
     }
 
-    if(IS_ERR(cl = class_create("drpn"))){
-        printk(KERN_ERR "ofd: error creating class in /sys/class/ directory\n");
+    if(IS_ERR(cl = class_create("pmad"))){
+        printk(KERN_ERR "pmad: error creating class in /sys/class/ directory\n");
         unregister_chrdev_region(first, num_of_device_files);
 
         return PTR_ERR(cl);
     }
 
     for(int i=0;i<num_of_device_files;i++){
-        if(IS_ERR(dev_ret = device_create(cl,NULL,MKDEV(MAJOR(first),MINOR(first)+i),NULL,"ofcd%d",i))){
-            printk(KERN_ERR "ofd: error creating device files in /dev/ directory\n");
+        if(IS_ERR(dev_ret = device_create(cl,NULL,MKDEV(MAJOR(first),MINOR(first)+i),NULL,"pmad%d",i))){
+            printk(KERN_ERR "pmad: error creating device files in /dev/ directory\n");
 
             for(int j=0;j<i;j++){
                 device_destroy(cl,MKDEV(MAJOR(first),MINOR(first)+j));
@@ -122,7 +122,7 @@ static int __init ofd_init(void){
         }
     }
 
-    printk(KERN_INFO "ofd: <Majot, Minor>: <%d, %d>\n", MAJOR(first), MINOR(first));
+    printk(KERN_INFO "pmad: <Major, Minor>: <%d, %d>\n", MAJOR(first), MINOR(first));
 
     cdev_init(&c_dev, &my_ops);
     if((ret = cdev_add(&c_dev, first, num_of_device_files)) < 0){
@@ -132,17 +132,17 @@ static int __init ofd_init(void){
         class_destroy(cl);
         unregister_chrdev_region(first, num_of_device_files);
 
-        printk(KERN_ERR "ofd: Error inserting operations on device files!\n");
+        printk(KERN_ERR "pmad: Error inserting operations on device files!\n");
 
         return ret;
     }
 
-    printk(KERN_INFO "ofd: initialized\n");
+    printk(KERN_INFO "pmad: Initialized\n");
 
     return 0;
 }
 
-static void __exit ofd_exit(void){
+static void __exit pmad_exit(void){
     cdev_del(&c_dev);
 
     for(int i=0;i<num_of_device_files;i++){
@@ -153,13 +153,13 @@ static void __exit ofd_exit(void){
 
     iounmap(vram);
 
-    printk(KERN_INFO "ofd: exited\n");
+    printk(KERN_INFO "pmad: exited\n");
 }
 
-module_init(ofd_init);
-module_exit(ofd_exit);
+module_init(pmad_init);
+module_exit(pmad_exit);
 
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("drpn14  <darpan1405@gmail.com>");
-MODULE_DESCRIPTION("Basic Constructor Destructor Module");
+MODULE_DESCRIPTION("Character Device Module to Access Physical Memory");
