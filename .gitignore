@@ -1,0 +1,8 @@
+.Module*
+.modules*
+.pmad*
+Module.symvers
+modules.order
+pmad.ko
+pmad.o
+pmad.m*
